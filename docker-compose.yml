@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Database service with PostGIS and pgvector
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: geovision_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-geovision_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-geovision_password}
+      POSTGRES_DB: ${POSTGRES_DB:-geovision_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-geovision_user} -d ${POSTGRES_DB:-geovision_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: geovision_backend
+    restart: always
+    environment:
+      - APP_ENV=production
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-geovision_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-geovision_password}
+      - POSTGRES_DB=${POSTGRES_DB:-geovision_db}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./backend/data:/app/data
+
+  # React Vite Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: geovision_frontend
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
