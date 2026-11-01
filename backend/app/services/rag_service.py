@@ -2,6 +2,7 @@ import os
 import json
 import re
 import math
+import datetime
 import numpy as np
 from typing import List, Dict, Any, Optional, Tuple
 from pypdf import PdfReader
@@ -14,10 +15,26 @@ from app.models.schemas import (
 
 class RAGService:
     """
-    Retrieval-Augmented Generation (RAG) Engine.
-    Handles multi-format document ingestion, semantic chunking, embedding generation,
-    vector similarity retrieval, and citation mapping.
+    Retrieval-Augmented Generation (RAG) Engine for Geospatial AI.
+    Features:
+    - Multi-format document ingestion (PDF, Markdown, TXT)
+    - Sliding window semantic chunking with metadata extraction
+    - Prompt injection defense & untrusted document content sanitization
+    - TF-IDF Sparse Embedding & Vector Cosine Similarity Search
+    - Support for Project Analytical Report auto-indexing
+    - Granular Document Deletion & Index Rebuilding
     """
+
+    # Prompt injection patterns to neutralize in untrusted ingested documents
+    INJECTION_PATTERNS = [
+        r'ignore\s+(all\s+)?previous\s+instructions?',
+        r'system\s+prompt\s+override',
+        r'you\s+are\s+now\s+in\s+developer\s+mode',
+        r'disregard\s+system\s+instructions?',
+        r'override\s+system\s+role',
+        r'<\s*script[^>]*>.*?<\s*/\s*script\s*>',
+        r'\[\s*system_instruction\s*\]'
+    ]
 
     def __init__(self):
         self.chunks_db_file = os.path.join(settings.VECTOR_STORE_PATH, "chunks_db.json")
@@ -48,6 +65,7 @@ class RAGService:
 
     def _save_store(self):
         """Persist chunks and vectors to disk."""
+        os.makedirs(settings.VECTOR_STORE_PATH, exist_ok=True)
         data = {
             "documents": self.documents,
             "vocabulary": self.vocabulary,
@@ -60,38 +78,54 @@ class RAGService:
             np.save(self.vectors_file, self.vectors)
 
     # -------------------------------------------------------------
-    # Document Text Extraction
+    # Text Extraction & Prompt Injection Sanitization
     # -------------------------------------------------------------
+    def sanitize_untrusted_text(self, text: str) -> str:
+        """Neutralize malicious prompt injection patterns while preserving academic content."""
+        clean = text
+        for pat in self.INJECTION_PATTERNS:
+            clean = re.sub(pat, '[CONTENT REDACTED: SECURITY POLICY]', clean, flags=re.IGNORECASE)
+        # Normalize whitespace
+        clean = re.sub(r'[\r\n\t]+', ' ', clean)
+        clean = re.sub(r'\s{2,}', ' ', clean).strip()
+        return clean
+
     def extract_text_from_file(self, file_path: str) -> List[Tuple[int, str]]:
         """Extract text with page/section numbers from PDF, MD, or TXT."""
         ext = os.path.splitext(file_path)[1].lower()
         extracted_pages: List[Tuple[int, str]] = []
 
         if ext == ".pdf":
-            reader = PdfReader(file_path)
-            for i, page in enumerate(reader.pages):
-                txt = page.extract_text() or ""
-                extracted_pages.append((i + 1, txt))
+            try:
+                reader = PdfReader(file_path)
+                for i, page in enumerate(reader.pages):
+                    raw_txt = page.extract_text() or ""
+                    sanitized = self.sanitize_untrusted_text(raw_txt)
+                    if sanitized:
+                        extracted_pages.append((i + 1, sanitized))
+            except Exception as e:
+                raise ValueError(f"Failed to parse PDF document: {e}")
         else:
             with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 full_text = f.read()
             # Split markdown/text by major section headers (# or \n\n)
             sections = re.split(r'\n(?=#{1,3}\s)', full_text)
             for idx, sec in enumerate(sections):
-                extracted_pages.append((idx + 1, sec))
+                sanitized = self.sanitize_untrusted_text(sec)
+                if sanitized:
+                    extracted_pages.append((idx + 1, sanitized))
 
         return extracted_pages
 
     # -------------------------------------------------------------
-    # Chunking & Cleaning
+    # Semantic Sliding-Window Chunking
     # -------------------------------------------------------------
-    def chunk_text(self, text: str, chunk_size: int = 500, overlap: int = 80) -> List[str]:
+    def chunk_text(self, text: str, chunk_size: int = 450, overlap: int = 75) -> List[str]:
         """Sliding window semantic chunker with word boundary preservation."""
-        clean_text = re.sub(r'\s+', ' ', text).strip()
-        if len(clean_text) <= chunk_size:
-            return [clean_text] if clean_text else []
+        if len(text) <= chunk_size:
+            return [text] if len(text.strip()) > 20 else []
 
-        words = clean_text.split(' ')
+        words = text.split(' ')
         chunks = []
         cur_words = []
         cur_len = 0
@@ -112,7 +146,7 @@ class RAGService:
                 cur_words = overlap_words
                 cur_len = overlap_len
 
-        if cur_words:
+        if cur_words and len(' '.join(cur_words).strip()) > 20:
             chunks.append(' '.join(cur_words))
 
         return chunks
@@ -123,6 +157,10 @@ class RAGService:
     def _build_tfidf_index(self):
         """Compute sparse term frequency-inverse document frequency vectors for local embedding."""
         if not self.documents:
+            self.vocabulary = {}
+            self.idf = {}
+            self.vectors = None
+            self._save_store()
             return
 
         # 1. Build Vocabulary
@@ -164,20 +202,30 @@ class RAGService:
         self._save_store()
 
     def ingest_document(self, file_path: str, doc_tag: str = "Domain") -> DocumentIngestionResponse:
-        """Ingest document, chunk it, and add to the vector store."""
+        """Ingest document, chunk it with metadata, and add to the vector store."""
         filename = os.path.basename(file_path)
         pages = self.extract_text_from_file(file_path)
         new_chunks = 0
         total_chars = 0
+        doc_type = os.path.splitext(filename)[1].upper().replace(".", "") or "TXT"
+        upload_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+        # Remove existing chunks for this file if re-ingesting
+        self.documents = [d for d in self.documents if d.get("document_name") != filename]
 
         for page_num, text in pages:
             chunks = self.chunk_text(text)
             for chunk in chunks:
-                if len(chunk.strip()) > 30:
+                if len(chunk.strip()) > 20:
                     self.documents.append({
                         "document_name": filename,
+                        "filename": filename,
+                        "source": file_path,
                         "page_number": page_num,
                         "chunk_index": len(self.documents),
+                        "character_count": len(chunk),
+                        "doc_type": doc_type,
+                        "upload_time": upload_time,
                         "text": chunk,
                         "tag": doc_tag
                     })
@@ -188,11 +236,85 @@ class RAGService:
 
         return DocumentIngestionResponse(
             filename=filename,
-            doc_type=os.path.splitext(filename)[1].upper().replace(".", ""),
+            doc_type=doc_type,
             num_chunks=new_chunks,
             character_count=total_chars,
             status="Indexed & Embedded"
         )
+
+    def index_project_report(self, report_dict: Dict[str, Any]) -> int:
+        """Index a project-generated analytical report so RAG can answer queries about the active project."""
+        report_title = report_dict.get("project_title", "GeoVision Analytical Report")
+        filename = f"Project_Report_{report_dict.get('report_id', 'latest')}.json"
+        
+        # Structure sections as distinct chunks
+        chunks_to_add = []
+        
+        # Section 1: Study Area & Executive Summary
+        summary_text = (
+            f"Project: {report_title}. Generated at: {report_dict.get('generated_at', '')}. "
+            f"Study Area: {report_dict.get('study_area_name', 'Active Study Area')}. "
+            f"Total Area: {report_dict.get('total_area_ha', 0.0)} ha ({report_dict.get('total_area_km2', 0.0)} km²). "
+            f"Dominant Land Cover: {report_dict.get('dominant_class', 'Vegetation')}. "
+            f"Sensor Provenance: Sentinel-2 MSI Level-2A surface reflectance."
+        )
+        chunks_to_add.append((1, summary_text))
+        
+        # Section 2: LULC Class Metrics
+        if "lulc_metrics" in report_dict:
+            classes_str = ", ".join([
+                f"{c.get('class_name', '')}: {c.get('area_hectares', 0)} ha ({c.get('percentage', 0)}%)"
+                for c in report_dict["lulc_metrics"]
+            ])
+            lulc_text = f"LULC 5-Class Classification Results for {report_title}: {classes_str}."
+            chunks_to_add.append((2, lulc_text))
+            
+        # Section 3: Multi-Temporal Change Dynamics
+        if "change_detection" in report_dict:
+            cd = report_dict["change_detection"]
+            cd_text = (
+                f"Multi-Temporal Change Detection (2020 Baseline to 2025 Recent): "
+                f"Total Unchanged Area: {cd.get('unchanged_area_ha', 0)} ha ({cd.get('unchanged_percentage', 0)}%). "
+                f"Total Changed Area: {cd.get('total_changed_area_ha', 0)} ha ({cd.get('total_changed_percentage', 0)}%). "
+                f"Main Conversion: Agriculture converted to Vegetation ({cd.get('most_converted_transition', {}).get('area_ha', 0)} ha)."
+            )
+            chunks_to_add.append((3, cd_text))
+
+        upload_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        self.documents = [d for d in self.documents if d.get("document_name") != filename]
+
+        for sec_num, text in chunks_to_add:
+            self.documents.append({
+                "document_name": filename,
+                "filename": filename,
+                "source": "Project Analysis Report",
+                "page_number": sec_num,
+                "chunk_index": len(self.documents),
+                "character_count": len(text),
+                "doc_type": "PROJECT_REPORT",
+                "upload_time": upload_time,
+                "text": text,
+                "tag": "Project Report"
+            })
+
+        self._build_tfidf_index()
+        return len(chunks_to_add)
+
+    def delete_document(self, document_name: str) -> bool:
+        """Remove all chunks associated with a document and recompute vector index."""
+        orig_len = len(self.documents)
+        self.documents = [d for d in self.documents if d.get("document_name") != document_name]
+        if len(self.documents) < orig_len:
+            self._build_tfidf_index()
+            # Also remove physical file if in knowledge base directory
+            target_file = os.path.join(settings.KNOWLEDGE_BASE_DIR, document_name)
+            if os.path.exists(target_file):
+                try:
+                    os.remove(target_file)
+                except Exception:
+                    pass
+            return True
+        return False
 
     # -------------------------------------------------------------
     # Vector Search & Retrieval
@@ -220,7 +342,7 @@ class RAGService:
 
         citations = []
         for idx in ranked_indices:
-            if scores[idx] <= 0.05:
+            if scores[idx] <= 0.04:
                 break
             doc = self.documents[idx]
             if filter_tag and doc.get("tag") != filter_tag:

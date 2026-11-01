@@ -7,6 +7,17 @@ export default {
   theme: {
     extend: {
       colors: {
+        brand: {
+          midnight: '#08162B',
+          navy: '#102A43',
+          ocean: '#176B87',
+          glacier: '#DDF3FA',
+          mist: '#F7FBFD',
+          forest: '#2E7D5B',
+          terrain: '#78A86B',
+          sand: '#D6BE8A',
+          slate: '#34465A',
+        },
         geo: {
           50: '#f0f9ff',
           100: '#e0f2fe',
@@ -29,21 +40,21 @@ export default {
           900: '#0f172a',
         },
         lulc: {
-          vegetation: '#10b981', // Emerald
-          water: '#06b6d4',      // Cyan
-          builtup: '#f43f5e',    // Rose
-          agriculture: '#f59e0b',// Amber
-          bareland: '#a16207',   // Brown/Earth
+          vegetation: '#2E7D5B', // Forest green
+          water: '#176B87',      // Ocean blue
+          builtup: '#e11d48',    // Urban rose
+          agriculture: '#78A86B',// Terrain green
+          bareland: '#D6BE8A',   // Sand
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
       boxShadow: {
         'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
-        'floating': '0 10px 25px -5px rgba(14, 165, 233, 0.08), 0 8px 10px -6px rgba(14, 165, 233, 0.04)',
-        'elevated': '0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.03)',
+        'floating': '0 10px 25px -5px rgba(23, 107, 135, 0.08), 0 8px 10px -6px rgba(23, 107, 135, 0.04)',
+        'elevated': '0 20px 25px -5px rgba(8, 22, 43, 0.08), 0 8px 10px -6px rgba(8, 22, 43, 0.03)',
       }
     },
   },

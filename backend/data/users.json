@@ -1,0 +1,162 @@
+{
+  "admin@geovision.ai": {
+    "id": "usr_admin_001",
+    "email": "admin@geovision.ai",
+    "full_name": "System Administrator",
+    "role": "admin",
+    "pwd_hash": "107797bab31be364dad84a4ebf8275469ed020ffb7e17a0ba221dead3a19c819",
+    "salt": "042bf437f0c2ba257ed1bd418c91eb45",
+    "created_at": "2025-01-01T00:00:00Z",
+    "last_login": "2026-10-28T19:51:03Z"
+  },
+  "researcher_test@geovision.ai": {
+    "id": "usr_c2ab4b91905b",
+    "email": "researcher_test@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "54c60307ae7c3d534d9c1b052486a32fbf01735b756a38c1b8092bf1c49397fe",
+    "salt": "51fe82843a3fe57f7f1841accbb9cb11",
+    "created_at": "2026-10-28T18:49:56Z",
+    "last_login": "2026-10-28T18:53:32Z"
+  },
+  "researcher_8c7bdf@geovision.ai": {
+    "id": "usr_f56ed8ee6d31",
+    "email": "researcher_8c7bdf@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "fc7a11784beadb25fd91fcb9f108e4558d4bd3a8eca05b16cb612bd5dc2ba73a",
+    "salt": "4b91e766d7074f565093ab4d615bf3ca",
+    "created_at": "2026-10-28T18:52:14Z",
+    "last_login": "2026-10-28T18:52:14Z"
+  },
+  "user_rbac_6a954e@geovision.ai": {
+    "id": "usr_8731a55c3008",
+    "email": "user_rbac_6a954e@geovision.ai",
+    "full_name": "RBAC Test User",
+    "role": "user",
+    "pwd_hash": "46b1acfbfaa65189257b677d233d4c567731394d46a4f853f22333378ff50e79",
+    "salt": "07d5f40555455cbf926dd1b6ebe72b9b",
+    "created_at": "2026-10-28T18:52:14Z",
+    "last_login": "2026-10-28T18:52:14Z"
+  },
+  "researcher_48cdec@geovision.ai": {
+    "id": "usr_4c269c128a7e",
+    "email": "researcher_48cdec@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "6f5bff5d8e924c01a328daf73238b6deb8d4caf54f7b75a9a9eb9fc327ceadeb",
+    "salt": "dd2a5acd7da9919242b3655a9ec91027",
+    "created_at": "2026-10-28T18:52:36Z",
+    "last_login": "2026-10-28T18:52:37Z"
+  },
+  "user_rbac_dad96b@geovision.ai": {
+    "id": "usr_e37323e1f17f",
+    "email": "user_rbac_dad96b@geovision.ai",
+    "full_name": "RBAC Test User",
+    "role": "user",
+    "pwd_hash": "3d5af4829af3b50ab3b48ebe2e33b2f918a83b66a18eb3478bf28a8ca1af9988",
+    "salt": "a2b075326b85351a302d67d240230e19",
+    "created_at": "2026-10-28T18:52:37Z",
+    "last_login": "2026-10-28T18:52:37Z"
+  },
+  "researcher_996590@geovision.ai": {
+    "id": "usr_8373db431cc3",
+    "email": "researcher_996590@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "7c579e6b5deab69388af118cadac5adbdc987959c5dac1d540416ee6d2380b89",
+    "salt": "9d4391e4ec361778cdcfba2109bffa35",
+    "created_at": "2026-10-28T19:23:34Z",
+    "last_login": "2026-10-28T19:23:34Z"
+  },
+  "user_rbac_cb5e34@geovision.ai": {
+    "id": "usr_33ec613cff91",
+    "email": "user_rbac_cb5e34@geovision.ai",
+    "full_name": "RBAC Test User",
+    "role": "user",
+    "pwd_hash": "3c727e32d51f6cc03c2a7bbc43b0c510b7f1f3feb36d53dee65915fc96ebf29f",
+    "salt": "cf95cf47166f3180c87848eb4ec3840d",
+    "created_at": "2026-10-28T19:23:34Z",
+    "last_login": "2026-10-28T19:23:34Z"
+  },
+  "researcher_bee09f@geovision.ai": {
+    "id": "usr_651eb18a6a1a",
+    "email": "researcher_bee09f@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "1db3b78551b2b9d6bc0fccf36efa27eb3a65c775037ae29c8650b8655fb828af",
+    "salt": "3b02b8ffcd525e406ffa736a9d2aa9b9",
+    "created_at": "2026-10-28T19:36:01Z",
+    "last_login": "2026-10-28T19:36:01Z"
+  },
+  "user_rbac_bed4f7@geovision.ai": {
+    "id": "usr_8cb15fd72f63",
+    "email": "user_rbac_bed4f7@geovision.ai",
+    "full_name": "RBAC Test User",
+    "role": "user",
+    "pwd_hash": "315355a70f25672feaa87528fc4ee0805bd0d6f9893a88e2705c608118e885cb",
+    "salt": "240b1d2b3efa2c3dbc741665843276f8",
+    "created_at": "2026-10-28T19:36:02Z",
+    "last_login": "2026-10-28T19:36:02Z"
+  },
+  "researcher_43a73d@geovision.ai": {
+    "id": "usr_475f6f827fe2",
+    "email": "researcher_43a73d@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "0a839839bce3c19019dfbb124402e92539073cb0d926479aa9e937c893047b28",
+    "salt": "7be19d88f582e83e39c8078948853c0d",
+    "created_at": "2026-10-28T19:39:44Z",
+    "last_login": "2026-10-28T19:39:44Z"
+  },
+  "user_rbac_af4b14@geovision.ai": {
+    "id": "usr_9da1f1a8697b",
+    "email": "user_rbac_af4b14@geovision.ai",
+    "full_name": "RBAC Test User",
+    "role": "user",
+    "pwd_hash": "dc2853a6aade2049e371de4e6cde33af5e09655ce14407b7bd524374b7ce42e7",
+    "salt": "d81eb7514c199f1dbe97ab6f83501ce2",
+    "created_at": "2026-10-28T19:39:45Z",
+    "last_login": "2026-10-28T19:39:45Z"
+  },
+  "researcher_11ba7f@geovision.ai": {
+    "id": "usr_21979588d2d0",
+    "email": "researcher_11ba7f@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "34009889aec7ff654435d8cdec2a326cc4a48a5d176c37ed635848946ab1c548",
+    "salt": "cf09a81d339c2705e15dd9f696c0d460",
+    "created_at": "2026-10-28T19:39:59Z",
+    "last_login": "2026-10-28T19:39:59Z"
+  },
+  "user_rbac_24945c@geovision.ai": {
+    "id": "usr_b612ed8ef553",
+    "email": "user_rbac_24945c@geovision.ai",
+    "full_name": "RBAC Test User",
+    "role": "user",
+    "pwd_hash": "69c1e6475041b8e61b81a7a75298e41e89b8938db99607d3a822e823b6702e5d",
+    "salt": "3e9a2d4cf9780ed479b0bf4da22c602b",
+    "created_at": "2026-10-28T19:40:00Z",
+    "last_login": "2026-10-28T19:40:00Z"
+  },
+  "researcher_33da59@geovision.ai": {
+    "id": "usr_8d145f9d86dc",
+    "email": "researcher_33da59@geovision.ai",
+    "full_name": "Test Researcher",
+    "role": "user",
+    "pwd_hash": "bf0c05b94a2e924ae2c99867caa5f99a8e5389588b08419385bdb933a5106e08",
+    "salt": "d3b785cdfb8a2920df748ea93c39b828",
+    "created_at": "2026-10-28T19:51:02Z",
+    "last_login": "2026-10-28T19:51:02Z"
+  },
+  "user_rbac_a278d2@geovision.ai": {
+    "id": "usr_35230fb90f8c",
+    "email": "user_rbac_a278d2@geovision.ai",
+    "full_name": "RBAC Test User",
+    "role": "user",
+    "pwd_hash": "231e90eab7bfb4199cadf87bf920c1bad123331232a413b6bd04614ca120dc3a",
+    "salt": "7a42ccb03a6e0445d0aecfda723f55b0",
+    "created_at": "2026-10-28T19:51:03Z",
+    "last_login": "2026-10-28T19:51:03Z"
+  }
+}

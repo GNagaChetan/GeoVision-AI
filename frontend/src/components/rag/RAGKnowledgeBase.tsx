@@ -10,7 +10,10 @@ import {
   CheckCircle2,
   RefreshCw,
   ExternalLink,
-  Tag
+  Tag,
+  Trash2,
+  AlertCircle,
+  HelpCircle
 } from 'lucide-react';
 import { GeoVisionAPI } from '../../services/api';
 import { RAGChunkCitation, IndexedDocument } from '../../types';
@@ -22,6 +25,7 @@ export const RAGKnowledgeBase: React.FC = () => {
   const [totalChunks, setTotalChunks] = useState<number>(0);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [deletingDoc, setDeletingDoc] = useState<string | null>(null);
 
   useEffect(() => {
     loadDocuments();
@@ -37,13 +41,14 @@ export const RAGKnowledgeBase: React.FC = () => {
     }
   };
 
-  const handleSearch = async (e?: React.FormEvent) => {
+  const handleSearch = async (e?: React.FormEvent, searchQuery?: string) => {
     if (e) e.preventDefault();
-    if (!query.trim()) return;
+    const q = searchQuery || query;
+    if (!q.trim()) return;
 
     setIsSearching(true);
     try {
-      const res = await GeoVisionAPI.queryRAG(query, 5);
+      const res = await GeoVisionAPI.queryRAG(q, 4);
       setCitations(res.citations);
     } catch (err) {
       console.error('RAG query failed:', err);
@@ -66,16 +71,42 @@ export const RAGKnowledgeBase: React.FC = () => {
     }
   };
 
+  const handleDeleteDocument = async (docName: string) => {
+    if (!window.confirm(`Are you sure you want to remove '${docName}' from the RAG knowledge index?`)) return;
+    setDeletingDoc(docName);
+    try {
+      await GeoVisionAPI.deleteDocument(docName);
+      setUploadStatus(`Removed '${docName}' from vector index.`);
+      loadDocuments();
+      if (citations.some(c => c.document_name === docName)) {
+        setCitations(prev => prev.filter(c => c.document_name !== docName));
+      }
+    } catch (err: any) {
+      setUploadStatus(err.response?.data?.detail || 'Failed to delete document.');
+    } finally {
+      setDeletingDoc(null);
+    }
+  };
+
   const handleInitDefaults = async () => {
     setUploadStatus('Indexing pre-loaded academic library...');
     try {
       await GeoVisionAPI.initDefaultKnowledge();
-      setUploadStatus('Pre-loaded knowledge base indexed successfully.');
+      setUploadStatus('Pre-loaded domain knowledge base indexed successfully.');
       loadDocuments();
     } catch (err) {
       setUploadStatus('Failed to initialize default knowledge.');
     }
   };
+
+  const REQUIRED_QUERIES = [
+    "What is remote sensing?",
+    "What is the difference between raster and vector data?",
+    "Explain histogram equalization.",
+    "What is LULC?",
+    "What does NDVI represent?",
+    "What image-processing method was used?"
+  ];
 
   return (
     <div className="p-4 max-w-[1600px] mx-auto space-y-4">
@@ -88,7 +119,7 @@ export const RAGKnowledgeBase: React.FC = () => {
           <div>
             <h2 className="text-base font-bold text-slate-900">RAG Domain Knowledge Base</h2>
             <p className="text-xs text-slate-500">
-              Vectorized Academic Literature, Remote Sensing Textbooks & GIS Planning Standards
+              Grounded Academic Literature, Remote Sensing Principles, GIS Standards & Ingested Project Reports
             </p>
           </div>
         </div>
@@ -96,10 +127,10 @@ export const RAGKnowledgeBase: React.FC = () => {
         <div className="flex items-center space-x-3">
           <button
             onClick={handleInitDefaults}
-            className="text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 px-3 py-2 rounded-xl border border-sky-200 transition-all flex items-center gap-1.5"
+            className="text-xs font-semibold text-sky-700 bg-sky-50 hover:bg-sky-100 px-3.5 py-2 rounded-xl border border-sky-200 transition-all flex items-center gap-1.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            Sync Domain Library
+            Re-index Domain Library
           </button>
 
           <label className="text-xs font-semibold text-white bg-sky-600 hover:bg-sky-700 px-3.5 py-2 rounded-xl shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
@@ -139,34 +170,59 @@ export const RAGKnowledgeBase: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-2">
-              {documents.map((doc, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 bg-slate-50 hover:bg-sky-50/50 rounded-xl border border-slate-200 transition-all space-y-1"
+            {documents.length === 0 ? (
+              <div className="p-6 text-center text-slate-400 space-y-2">
+                <FileText className="w-8 h-8 mx-auto text-slate-300" />
+                <p className="text-xs">No documents indexed yet.</p>
+                <button
+                  onClick={handleInitDefaults}
+                  className="text-xs text-sky-600 font-semibold hover:underline"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5 truncate">
-                      <FileText className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-                      {doc.document_name}
-                    </span>
+                  Load Pre-loaded Knowledge Library
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+                {documents.map((doc, idx) => (
+                  <div
+                    key={idx}
+                    className="p-3 bg-slate-50 hover:bg-sky-50/50 rounded-xl border border-slate-200 transition-all space-y-1.5 group"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5 truncate">
+                        <FileText className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                        <span className="truncate" title={doc.document_name}>{doc.document_name}</span>
+                      </span>
+                      <button
+                        onClick={() => handleDeleteDocument(doc.document_name)}
+                        disabled={deletingDoc === doc.document_name}
+                        className="text-slate-400 hover:text-red-600 p-1 rounded transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                        title="Delete document and re-index"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+                      <span className="flex items-center gap-1">
+                        <Tag className="w-3 h-3 text-slate-400" />
+                        {doc.tag}
+                      </span>
+                      <span className="font-mono font-semibold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
+                        {doc.chunks_count} chunks
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                    <span className="flex items-center gap-1">
-                      <Tag className="w-3 h-3 text-slate-400" />
-                      {doc.tag}
-                    </span>
-                    <span className="font-mono font-semibold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200">
-                      {doc.chunks_count} chunks
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
 
-            <p className="text-[11px] text-slate-400 leading-relaxed pt-2 border-t border-slate-100">
-              Semantic sliding-window chunking (500 chars with 80 chars overlap) preserves section context and page metadata.
-            </p>
+            <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-400 leading-relaxed space-y-1">
+              <p className="flex items-center gap-1 text-slate-500 font-semibold">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                Prompt Injection Defense Enabled
+              </p>
+              <p>Untrusted documents are sanitized, control directives are neutralized, and citations are isolated from system instructions.</p>
+            </div>
           </div>
         </div>
 
@@ -181,34 +237,40 @@ export const RAGKnowledgeBase: React.FC = () => {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search literature (e.g. 'NDVI formula', 'CLAHE clipping threshold', 'Transition matrix', 'Canny hysteresis')..."
+                  placeholder="Ask a scientific question or search concepts (e.g. 'What is remote sensing?')..."
                   className="w-full text-xs bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-900 font-medium"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isSearching}
-                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all disabled:opacity-50"
+                className="bg-sky-600 hover:bg-sky-700 text-white font-semibold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5"
               >
+                {isSearching ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
                 {isSearching ? 'Searching...' : 'Vector Search'}
               </button>
             </form>
 
-            {/* Quick Keyword Suggestions */}
-            <div className="flex flex-wrap gap-1.5 items-center text-xs text-slate-500">
-              <span className="text-[11px] font-semibold text-slate-400">Quick Queries:</span>
-              {['NDVI Spectral Index', 'CLAHE Clipping Limit', 'Canny Edge Detection', 'LULC Transition Matrix', '2D-DFT Frequency Spectrum'].map((k) => (
-                <button
-                  key={k}
-                  onClick={() => {
-                    setQuery(k);
-                    GeoVisionAPI.queryRAG(k, 4).then(res => setCitations(res.citations));
-                  }}
-                  className="bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-600 text-[11px] font-medium px-2.5 py-1 rounded-lg border border-slate-200 transition-all"
-                >
-                  {k}
-                </button>
-              ))}
+            {/* Academic Syllabus Quick Queries */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1">
+                <HelpCircle className="w-3 h-3 text-sky-600" />
+                Standard Domain Questions:
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {REQUIRED_QUERIES.map((k) => (
+                  <button
+                    key={k}
+                    onClick={() => {
+                      setQuery(k);
+                      handleSearch(undefined, k);
+                    }}
+                    className="bg-slate-50 hover:bg-sky-50 hover:text-sky-700 text-slate-700 text-[11px] font-medium px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-sky-200 transition-all text-left"
+                  >
+                    {k}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -220,15 +282,15 @@ export const RAGKnowledgeBase: React.FC = () => {
               </span>
               {citations.length > 0 && (
                 <span className="text-xs text-slate-500">
-                  Ranked by Cosine Similarity Metric
+                  Cosine Similarity Ranking
                 </span>
               )}
             </div>
 
             {citations.length === 0 ? (
-              <div className="bg-white rounded-2xl p-8 border border-slate-200 text-center space-y-2 text-slate-400">
+              <div className="bg-white rounded-2xl p-10 border border-slate-200 text-center space-y-2 text-slate-400">
                 <Bookmark className="w-8 h-8 mx-auto text-slate-300" />
-                <p className="text-xs font-medium">Enter a query above to retrieve grounded literature citations.</p>
+                <p className="text-xs font-medium">Select a standard domain question or enter a search query above.</p>
               </div>
             ) : (
               citations.map((c, idx) => (

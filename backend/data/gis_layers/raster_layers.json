@@ -1,0 +1,24 @@
+[
+  {
+    "id": "raster_sentinel2_rgb",
+    "name": "Sentinel-2 True Color (10m)",
+    "study_area_id": "study_area_default",
+    "file_path": "C:\\Users\\DELL\\Downloads\\GeoVision-AI\\backend\\data\\sample_datasets\\sentinel2_multispectral_sample.tif",
+    "crs": "EPSG:32643",
+    "spatial_resolution_m": 10.0,
+    "width": 512,
+    "height": 512,
+    "band_count": 5,
+    "bounds_wgs84": [
+      78.435,
+      17.412,
+      78.4862,
+      17.4632
+    ],
+    "colormap": "rgb",
+    "opacity": 1.0,
+    "visible": true,
+    "z_index": 0,
+    "created_at": "2026-10-01T20:03:08.725204+00:00"
+  }
+]

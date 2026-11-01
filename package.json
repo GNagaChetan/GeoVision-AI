@@ -1,0 +1,26 @@
+{
+  "name": "geovision-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GeoVision AI - Intelligent Satellite Image Processing, GIS Analytics and RAG-Based Decision Support System",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "dev:all": "node scripts/dev.js",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "cd backend && .venv\\Scripts\\python -m uvicorn main:app --reload --port 8000",
+    "build": "npm run build --prefix frontend",
+    "install:frontend": "npm install --prefix frontend",
+    "test:backend": "cd backend && .venv\\Scripts\\pytest -v tests/"
+  },
+  "keywords": [
+    "geospatial",
+    "remote-sensing",
+    "gis",
+    "satellite-imagery",
+    "deep-learning",
+    "fastapi",
+    "react"
+  ],
+  "author": "GeoVision AI Team",
+  "license": "MIT"
+}

@@ -1,0 +1,325 @@
+{
+  "report_id": "REP-20261029-012111",
+  "project_title": "GeoVision QA Compliance Report",
+  "author": "Quality Assurance Test Suite",
+  "generated_at": "2026-10-28T19:51:11.735936+00:00",
+  "study_area": {
+    "name": "Sentinel-2 Hyderabad Study Area",
+    "total_area_ha": 3082.1652,
+    "total_area_km2": 30.8217,
+    "crs": null,
+    "ground_sampling_distance_m": 10.0
+  },
+  "satellite_sensor": {
+    "sensor_platform": "Sentinel-2 MultiSpectral Instrument (MSI)",
+    "level": "Level-2A Bottom-Of-Atmosphere (BOA) Surface Reflectance",
+    "bands_processed": [
+      "B02 (Blue)",
+      "B03 (Green)",
+      "B04 (Red)",
+      "B08 (NIR)"
+    ],
+    "radiometric_resolution": "12-bit scaled to 8-bit Float32"
+  },
+  "image_processing_operations": [
+    {
+      "operation": "Histogram Equalization & CLAHE",
+      "purpose": "Radiometric contrast optimization across urban and water zones",
+      "metric": "SSIM: 0.942"
+    },
+    {
+      "operation": "Gaussian & Median Despeckling",
+      "purpose": "Noise attenuation and salt-and-pepper artifact suppression",
+      "kernel": "3x3"
+    },
+    {
+      "operation": "Sub-Pixel Image Registration",
+      "purpose": "Spatial alignment between T1 (2020) and T2 (2025) rasters",
+      "accuracy": "< 0.2 px RMS"
+    }
+  ],
+  "lulc_classification": {
+    "method": "Spectral Index & Decision Tree Multi-Space Classification",
+    "dominant_class": "Vegetation",
+    "total_classified_ha": 2621.44,
+    "classes_t1_2020": [
+      {
+        "class_id": 0,
+        "class_name": "Vegetation",
+        "color_hex": "#10b981",
+        "pixel_count": 128457,
+        "area_hectares": 1284.57,
+        "area_sq_km": 12.8457,
+        "percentage": 49.0
+      },
+      {
+        "class_id": 1,
+        "class_name": "Water",
+        "color_hex": "#06b6d4",
+        "pixel_count": 23550,
+        "area_hectares": 235.5,
+        "area_sq_km": 2.355,
+        "percentage": 8.98
+      },
+      {
+        "class_id": 2,
+        "class_name": "Built-up",
+        "color_hex": "#f43f5e",
+        "pixel_count": 108357,
+        "area_hectares": 1083.57,
+        "area_sq_km": 10.8357,
+        "percentage": 41.33
+      },
+      {
+        "class_id": 3,
+        "class_name": "Agriculture",
+        "color_hex": "#f59e0b",
+        "pixel_count": 1780,
+        "area_hectares": 17.8,
+        "area_sq_km": 0.178,
+        "percentage": 0.68
+      },
+      {
+        "class_id": 4,
+        "class_name": "Bare Land",
+        "color_hex": "#a16207",
+        "pixel_count": 0,
+        "area_hectares": 0.0,
+        "area_sq_km": 0.0,
+        "percentage": 0.0
+      }
+    ],
+    "classes_t2_2025": [
+      {
+        "class_id": 0,
+        "class_name": "Vegetation",
+        "color_hex": "#10b981",
+        "pixel_count": 128481,
+        "area_hectares": 1284.81,
+        "area_sq_km": 12.8481,
+        "percentage": 49.01
+      },
+      {
+        "class_id": 1,
+        "class_name": "Water",
+        "color_hex": "#06b6d4",
+        "pixel_count": 23550,
+        "area_hectares": 235.5,
+        "area_sq_km": 2.355,
+        "percentage": 8.98
+      },
+      {
+        "class_id": 2,
+        "class_name": "Built-up",
+        "color_hex": "#f43f5e",
+        "pixel_count": 108357,
+        "area_hectares": 1083.57,
+        "area_sq_km": 10.8357,
+        "percentage": 41.33
+      },
+      {
+        "class_id": 3,
+        "class_name": "Agriculture",
+        "color_hex": "#f59e0b",
+        "pixel_count": 1756,
+        "area_hectares": 17.56,
+        "area_sq_km": 0.1756,
+        "percentage": 0.67
+      },
+      {
+        "class_id": 4,
+        "class_name": "Bare Land",
+        "color_hex": "#a16207",
+        "pixel_count": 0,
+        "area_hectares": 0.0,
+        "area_sq_km": 0.0,
+        "percentage": 0.0
+      }
+    ]
+  },
+  "vegetation_analytics": {
+    "formula": "NDVI = (NIR - Red) / (NIR + Red)",
+    "mean_ndvi": 0.1575,
+    "median_ndvi": -0.2727,
+    "min_ndvi": -0.4286,
+    "max_ndvi": 0.7692,
+    "std_dev": 0.5015,
+    "dominant_vegetation_health": "Water & Clouds",
+    "threshold_distribution": [
+      {
+        "category": "Water & Clouds",
+        "min_val": -1.0,
+        "max_val": 0.0,
+        "color_hex": "#06b6d4",
+        "pixel_count": 131907,
+        "area_ha": 1319.07,
+        "percentage": 50.32,
+        "description": "Deep water bodies, streams, cloud shadows, snow cover"
+      },
+      {
+        "category": "Bare Soil & Built-Up",
+        "min_val": 0.0,
+        "max_val": 0.2,
+        "color_hex": "#a16207",
+        "pixel_count": 0,
+        "area_ha": 0.0,
+        "percentage": 0.0,
+        "description": "Barren land, exposed soil, paved roads, urban concrete"
+      },
+      {
+        "category": "Moderate Vegetation",
+        "min_val": 0.2,
+        "max_val": 0.5,
+        "color_hex": "#84cc16",
+        "pixel_count": 0,
+        "area_ha": 0.0,
+        "percentage": 0.0,
+        "description": "Grasslands, shrublands, sparse foliage, maturing crops"
+      },
+      {
+        "category": "Dense Healthy Forest",
+        "min_val": 0.5,
+        "max_val": 1.0,
+        "color_hex": "#15803d",
+        "pixel_count": 130237,
+        "area_ha": 1302.37,
+        "percentage": 49.68,
+        "description": "Dense tropical canopy, healthy woodland, high chlorophyll biomass"
+      }
+    ]
+  },
+  "change_detection": {
+    "baseline_period": "2020 Baseline (T1)",
+    "recent_period": "2025 Recent (T2)",
+    "unchanged_area_ha": 2587.6,
+    "unchanged_percentage": 98.71,
+    "total_changed_area_ha": 33.84,
+    "total_changed_percentage": 1.29,
+    "most_converted_transition": {
+      "from_class": "Agriculture",
+      "to_class": "Vegetation",
+      "area_ha": 17.04
+    },
+    "class_changes": [
+      {
+        "class_id": 0,
+        "class_name": "Vegetation",
+        "color_hex": "#10b981",
+        "t1_ha": 1284.57,
+        "t2_ha": 1284.81,
+        "change_ha": 0.24,
+        "change_pct": 0.02
+      },
+      {
+        "class_id": 1,
+        "class_name": "Water",
+        "color_hex": "#06b6d4",
+        "t1_ha": 235.5,
+        "t2_ha": 235.5,
+        "change_ha": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "class_id": 2,
+        "class_name": "Built-up",
+        "color_hex": "#f43f5e",
+        "t1_ha": 1083.57,
+        "t2_ha": 1083.57,
+        "change_ha": 0.0,
+        "change_pct": 0.0
+      },
+      {
+        "class_id": 3,
+        "class_name": "Agriculture",
+        "color_hex": "#f59e0b",
+        "t1_ha": 17.8,
+        "t2_ha": 17.56,
+        "change_ha": -0.24,
+        "change_pct": -1.35
+      },
+      {
+        "class_id": 4,
+        "class_name": "Bare Land",
+        "color_hex": "#a16207",
+        "t1_ha": 0.0,
+        "t2_ha": 0.0,
+        "change_ha": 0.0,
+        "change_pct": 0.0
+      }
+    ],
+    "transition_matrix_ha": [
+      [
+        1267.77,
+        0.0,
+        0.0,
+        16.8,
+        0.0
+      ],
+      [
+        0.0,
+        235.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1083.57,
+        0.0,
+        0.0
+      ],
+      [
+        17.04,
+        0.0,
+        0.0,
+        0.76,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "transition_labels": [
+      "Vegetation",
+      "Water",
+      "Built-up",
+      "Agriculture",
+      "Bare Land"
+    ]
+  },
+  "gis_spatial_analytics": {
+    "active_vector_layers": 1,
+    "geodesic_method": "WGS84 Vincenty Ellipsoidal Distance & Shoelace Geodesics",
+    "riparian_buffer_analysis": "150m buffer applied around study water bodies"
+  },
+  "rag_sources": [
+    {
+      "document_name": "test_remote_sensing_theory.md",
+      "page_number": 1,
+      "similarity_score": 0.288,
+      "snippet": "# Remote Sensing & Spectral Reflectance Remote sensing measures electromagnetic radiation across optical bands. NDVI evaluates chlorophyll absorption in the red band and high reflectance in the NIR band."
+    },
+    {
+      "document_name": "remote_sensing_fundamentals.md",
+      "page_number": 1,
+      "similarity_score": 0.27,
+      "snippet": "# Remote Sensing Fundamentals & Spectral Analysis"
+    },
+    {
+      "document_name": "remote_sensing_fundamentals.md",
+      "page_number": 4,
+      "similarity_score": 0.242,
+      "snippet": "## 3. What does NDVI Represent? The **Normalized Difference Vegetation Index (NDVI)** is a dimensionless radiometric index that quantitatively measures chlorophyll concentration, photosynthetic capacity, and canopy biomass density: $$NDVI = \\frac{\\rho_{NIR} - \\rho_{Red}}{\\rho_{NIR} + \\rho_{Red}}$$"
+    }
+  ],
+  "limitations_and_provenance": [
+    "Analysis uses simulated Sentinel-2 multi-band reflectance calibrated to standard BOA surface reflectance.",
+    "Pixel ground sampling distance is 10.0m; sub-pixel features below 100m\u00b2 are subject to spectral mixing.",
+    "Atmospheric cloud shadows and high turbidity water bodies can depress NDVI values."
+  ]
+}

@@ -22,26 +22,26 @@ def verify_db():
                 # 1. PostgreSQL version
                 cur.execute("SELECT version();")
                 pg_ver = cur.fetchone()[0]
-                print(f"✓ PostgreSQL Connected: {pg_ver}")
+                print(f"[OK] PostgreSQL Connected: {pg_ver}")
 
                 # 2. PostGIS version
                 try:
                     cur.execute("SELECT PostGIS_Full_Version();")
                     postgis_ver = cur.fetchone()[0]
-                    print(f"✓ PostGIS Enabled: {postgis_ver}")
+                    print(f"[OK] PostGIS Enabled: {postgis_ver}")
                 except Exception as e:
-                    print(f"⚠ PostGIS Check Notice: {e}")
+                    print(f"[NOTICE] PostGIS Check: {e}")
 
                 # 3. pgvector extension
                 try:
                     cur.execute("SELECT extversion FROM pg_extension WHERE extname = 'vector';")
                     row = cur.fetchone()
                     if row:
-                        print(f"✓ pgvector Enabled: version {row[0]}")
+                        print(f"[OK] pgvector Enabled: version {row[0]}")
                     else:
-                        print("ℹ pgvector extension not present in current DB instance (in-memory/file fallback active).")
+                        print("[INFO] pgvector extension not present in current DB instance (in-memory/file fallback active).")
                 except Exception as e:
-                    print(f"ℹ pgvector Check Notice: {e}")
+                    print(f"[INFO] pgvector Check: {e}")
 
                 # 4. Check tables
                 cur.execute("""
@@ -49,7 +49,7 @@ def verify_db():
                     WHERE table_schema = 'public' ORDER BY table_name;
                 """)
                 tables = [r[0] for r in cur.fetchall()]
-                print(f"✓ Tables Present ({len(tables)}): {', '.join(tables)}")
+                print(f"[OK] Tables Present ({len(tables)}): {', '.join(tables)}")
 
         return True
     except Exception as err:
